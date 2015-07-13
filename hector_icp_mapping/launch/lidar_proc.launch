@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+
+<launch>
+  
+  <arg name="lidar_filter_target_frame"   default="odom"/>
+
+  <include file="$(find vigir_lidar_proc_launch)/launch/lidar_proc.launch">
+    <arg name="node_name_prefix" value="front_" />
+    <arg name="scan_topic" value="/front_spinning_lidar/scan" />
+    <arg name="scan_cloud_topic" value="/scan_cloud" />
+    <arg name="scan_cloud_filtered_topic" value="/scan_cloud_filtered" />
+
+    <arg name="target_frame" value="$(arg lidar_filter_target_frame)" />
+    <arg name="use_high_fidelity_projection" value="true" />
+  </include>
+
+  <include file="$(find vigir_lidar_proc_launch)/launch/lidar_proc.launch">
+    <arg name="node_name_prefix" value="rear_" />
+    <arg name="scan_topic" value="/rear_spinning_lidar/scan" />
+    <arg name="scan_cloud_topic" value="/scan_cloud" />
+    <arg name="scan_cloud_filtered_topic" value="/scan_cloud_filtered" />
+
+    <arg name="target_frame" value="$(arg lidar_filter_target_frame)" />
+    <arg name="use_high_fidelity_projection" value="true" />
+  </include>
+  
+  <rosparam file="$(find vigir_lidar_proc_launch)/config/argo_lidar_self_filter.yaml" command="load" ns="front_self_filter_lidar" />
+  <rosparam file="$(find vigir_lidar_proc_launch)/config/argo_lidar_self_filter.yaml" command="load" ns="rear_self_filter_lidar" />
+  
+</launch>
