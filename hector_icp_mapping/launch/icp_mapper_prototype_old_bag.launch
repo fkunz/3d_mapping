@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="namespace" default="/scan_cloud" />
+
+  <include file="$(find hector_icp_mapping)/launch/lidar_proc.launch" >
+    <arg name="scan_topic" default="/scan_filtered" />
+  </include>
+
+  <node name="header_manipulation_node" type="header_manipulation_node" pkg="header_manipulation" output="screen" ns="$(arg namespace)" >
+    <remap from="header_manipulation_node/input" to="/scan_cloud/filtered" />
+    <remap from="header_manipulation_node/output" to="/scan_cloud/modified" />
+    <param name="time_offset_milliseconds" value="25.0" />
+<!-- Setting for ohne_video: 25.0 -->
+<!-- Setting for speed_3_safe: 42.0 -->
+<!-- Setting for speed_6: 12.0 -->
+  </node>
+
+  <node type="point_cloud2_assembler" pkg="laser_assembler" name="assembler" ns="$(arg namespace)" output="screen" >
+    <remap from="cloud" to="modified" />
+    <param name="max_clouds" type="int" value="400" />
+    <param name="fixed_frame" type="string" value="base_link" />
+  </node>
+
+  <node type="assembler_trigger" pkg="pointcloud_assembler_trigger" name="trigger" ns="$(arg namespace)" output="screen" >
+    <remap from="trigger/modified" to="/scan_cloud/modified" />
+  </node>
+
+  <node type="odom_estimation" pkg="monstertruck_odom_estimation" name="odom" output="screen" >
+    <param name="odom_reference_frame" value="odom" />
+    <param name="platform_root_frame" value="base_stabilized" />
+    <param name="ang_vel_factor" value="0.4" />
+    <param name="lin_vel_factor" value="2.0" />
+  </node>
+
+  <node name="mapper" type="mapper" pkg="ethzasl_icp_mapper" output="screen">
+    <remap from="cloud_in" to="/scan_cloud/assembled" />
+    <param name="subscribe_cloud" value="true" />
+    <param name="subscribe_scan" value="false" />
+    <param name="icpConfig" value="$(find hector_icp_mapping)/config/icp.yaml" />
+    <param name="inputFiltersConfig" value="$(find hector_icp_mapping)/config/input_filters.yaml" />
+    <param name="mapPostFiltersConfig" value="$(find hector_icp_mapping)/config/map_post_filters.yaml" />
+    <param name="odom_frame" value="/odom" />
+    <param name="map_frame" value="/map" />
+    <param name="useROSLogger" value="true" />
+    <param name="minOverlap" value="0.2" />
+    <param name="maxOverlapToMerge" value="0.99" />
+    <param name="minReadingPointCount" value="600" />
+    <param name="minMapPointCount" value="10000" />
+    <param name="localizing" value="true" />
+    <param name="mapping" value="true" />
+  </node>
+
+</launch>

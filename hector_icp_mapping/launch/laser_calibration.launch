@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="namespace" default="/scan_cloud" />
+
+  <node type="point_cloud2_assembler" pkg="laser_assembler" name="cw_assembler" ns="$(arg namespace)" output="screen" >
+    <remap from="cloud" to="cw_assembled" />
+    <param name="max_clouds" type="int" value="400" />
+    <param name="fixed_frame" type="string" value="cw_laser1RollServo" />
+  </node>
+
+  <node type="point_cloud2_assembler" pkg="laser_assembler" name="ccw_assembler" ns="$(arg namespace)" output="screen" >
+    <remap from="cloud" to="ccw_assembled" />
+    <param name="max_clouds" type="int" value="400" />
+    <param name="fixed_frame" type="string" value="ccw_laser1RollServo" />
+  </node>
+
+  <node type="assembler_trigger" pkg="pointcloud_assembler_trigger" name="trigger" ns="$(arg namespace)" output="screen" >
+    <param name="check_sensor_pos" value="false" />
+    <remap from="/modified" to="cw_assembled" />
+    <remap from="/assembled" to="cw_assembled_2" />
+  </node>
+
+  <node type="assembler_trigger" pkg="pointcloud_assembler_trigger" name="trigger" ns="$(arg namespace)" output="screen" >
+    <param name="check_sensor_pos" value="false" />
+    <remap from="/modified" to="ccw_assembled" />
+    <remap from="/assembled" to="ccw_assembled_2" />
+  </node>
+
+</launch>

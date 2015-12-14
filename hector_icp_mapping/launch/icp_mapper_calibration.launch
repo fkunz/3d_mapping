@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+
+<launch>
+<!--  <include file="$(find hector_icp_mapping)/launch/preprocessing.launch" >
+  </include>-->
+
+  <node name="mapper" type="mapper" pkg="ethzasl_icp_mapper" output="screen">
+    <remap from="cloud_in" to="/scan_cloud/assembled" />
+    <param name="subscribe_cloud" value="true" />
+    <param name="subscribe_scan" value="false" />
+    <param name="icpConfig" value="$(find hector_icp_mapping)/config/icp.yaml" />
+    <param name="inputFiltersConfig" value="$(find hector_icp_mapping)/config/input_filters.yaml" />
+    <param name="mapPostFiltersConfig" value="$(find hector_icp_mapping)/config/map_post_filters.yaml" />
+    <param name="odom_frame" value="/odom" />
+    <param name="map_frame" value="/map" />
+    <param name="useROSLogger" value="true" />
+    <param name="minOverlap" value="0.2" />
+    <param name="maxOverlapToMerge" value="1" />
+    <param name="minReadingPointCount" value="200" />
+    <param name="minMapPointCount" value="10000" />
+    <param name="localizing" value="true" />
+    <param name="mapping" value="true" />
+  </node>
+
+</launch>

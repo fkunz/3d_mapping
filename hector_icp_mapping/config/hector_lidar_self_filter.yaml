@@ -1,0 +1,23 @@
+min_sensor_dist: 0.1
+self_see_default_padding: 0.05
+self_see_default_scale: 1.0
+self_see_links:
+- name: Front_left_motor_link
+- name: Front_left_wheel_link
+- name: Front_right_motor_link
+- name: Front_right_wheel_link
+- name: Rear_left_motor_link
+- name: Rear_left_wheel_link
+- name: Rear_right_motor_link
+- name: Rear_right_wheel_link
+- name: base_link
+- name: cameraYawServo
+- name: infrared_frame
+- name: laser1RollServo
+- name: laser1_frame
+- name: laser1_link
+- name: left_camera_link
+- name: openni_link
+- name: right_camera_link
+- name: top_box_link
+- name: vertical_laser_frame

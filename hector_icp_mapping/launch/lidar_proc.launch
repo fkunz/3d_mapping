@@ -1,30 +1,30 @@
 <?xml version="1.0"?>
 
 <launch>
-  
-  <arg name="lidar_filter_target_frame"   default="odom"/>
 
-  <include file="$(find vigir_lidar_proc_launch)/launch/lidar_proc.launch">
-    <arg name="node_name_prefix" value="front_" />
-    <arg name="scan_topic" value="/front_spinning_lidar/scan" />
-    <arg name="scan_cloud_topic" value="/scan_cloud" />
-    <arg name="scan_cloud_filtered_topic" value="/scan_cloud_filtered" />
+  <arg name="min_range" default="0.01" />
+  <arg name="robot_description_name" default="$(find xacro)/xacro.py '$(find monstertruck_urdf)/hector/hector_ugv.urdf.xacro'" />
+  <arg name="scan_topic" default="/scan_filtered" />
+  <arg name="namespace" default="/scan_cloud" />
+  <arg name="scan_cloud_topic" default="unfiltered" />
+  <arg name="scan_cloud_filtered_topic" default="filtered" />
+  <arg name="target_frame" default="/base_link" />
+  <arg name="use_high_fidelity_projection" default="true" />
+  <arg name="filter_config_file" default="$(find hector_icp_mapping)/config/hector_lidar_self_filter.yaml" />
 
-    <arg name="target_frame" value="$(arg lidar_filter_target_frame)" />
-    <arg name="use_high_fidelity_projection" value="true" />
-  </include>
+  <param name="$(arg namespace)/robot_description" command="$(arg robot_description_name)" />
 
-  <include file="$(find vigir_lidar_proc_launch)/launch/lidar_proc.launch">
-    <arg name="node_name_prefix" value="rear_" />
-    <arg name="scan_topic" value="/rear_spinning_lidar/scan" />
-    <arg name="scan_cloud_topic" value="/scan_cloud" />
-    <arg name="scan_cloud_filtered_topic" value="/scan_cloud_filtered" />
+  <node pkg="vigir_laserscan_to_pointcloud" type="laserscan_to_pointcloud_node" name="hector_scan_to_cloud" output="screen" respawn="true" ns="$(arg namespace)" >
+    <param name="min_range" value="$(arg min_range)" />
+    <remap from="scan" to="$(arg scan_topic)" />
+    <remap from="scan_cloud" to="$(arg scan_cloud_topic)" />
+    <param name="target_frame" value="$(arg target_frame)" />
+    <param name="use_high_fidelity_projection" value="$(arg use_high_fidelity_projection)" />
+  </node>
 
-    <arg name="target_frame" value="$(arg lidar_filter_target_frame)" />
-    <arg name="use_high_fidelity_projection" value="true" />
-  </include>
-  
-  <rosparam file="$(find vigir_lidar_proc_launch)/config/argo_lidar_self_filter.yaml" command="load" ns="front_self_filter_lidar" />
-  <rosparam file="$(find vigir_lidar_proc_launch)/config/argo_lidar_self_filter.yaml" command="load" ns="rear_self_filter_lidar" />
-  
+  <node pkg="robot_self_filter" type="self_filter" name="hector_3d_self_filter" output="screen" respawn="true" ns="$(arg namespace)" >
+    <remap from="cloud_in" to="$(arg scan_cloud_topic)" />
+    <remap from="cloud_out" to="$(arg scan_cloud_filtered_topic)" />
+    <rosparam command="load" file="$(arg filter_config_file)" />
+  </node>
 </launch>

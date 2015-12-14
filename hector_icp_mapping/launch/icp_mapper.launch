@@ -2,7 +2,7 @@
 
 <launch>
   <node name="mapper" type="mapper" pkg="ethzasl_icp_mapper" output="screen">
-    <remap from="cloud_in" to="/scan_cloud_aggregated" />
+    <remap from="cloud_in" to="/scan_cloud_assembled" />
     <param name="subscribe_scan" value="false" />
     <param name="icpConfig" value="$(find argo_onboard_launch)/config/icp.yaml" />
     <param name="inputFiltersConfig" value="$(find argo_onboard_launch)/config/input_filters.yaml" />
@@ -28,7 +28,7 @@
   </node>
   
   <node type="pointcloud_assembler_trigger_node" pkg="pointcloud_assembler_trigger" name="trigger" ns="/scan_cloud">
-    <remap from="aggregated" to="/scan_cloud_aggregated"/>
+    <remap from="assembled" to="/scan_cloud_assembled"/>
   </node>
   
 </launch>

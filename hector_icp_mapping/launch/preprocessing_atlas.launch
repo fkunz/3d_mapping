@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="namespace" default="/scan_cloud" />
+  <arg name="scan_topic" default="/multisense_sl/laser/scan" />
+
+  <include file="$(find hector_icp_mapping)/launch/lidar_proc.launch" >
+    <arg name="scan_topic" value="$(arg scan_topic)" />
+    <arg name="robot_description_name" value="$(find xacro)/xacro.py '$(find flor_atlas_description)/urdf/atlas_v3_self_filter.urdf'" />
+    <arg name="min_range" value="0.6" />
+    <arg name="target_frame" value="world" />
+    <arg name="filter_config_file" default="$(find hector_icp_mapping)/config/atlas_lidar_self_filter.yaml" />
+  </include>
+
+  <node type="point_cloud2_assembler" pkg="laser_assembler" name="assembler" ns="$(arg namespace)" output="screen" >
+    <remap from="cloud" to="filtered" />
+    <param name="max_clouds" type="int" value="400" />
+    <param name="fixed_frame" type="string" value="world" />
+  </node>
+
+  <node type="assembler_trigger_old" pkg="pointcloud_assembler_trigger" name="trigger" ns="$(arg namespace)" output="screen" >
+    <remap from="trigger/modified" to="/scan_cloud/filtered" />
+    <param name="check_sensor_pos" value="false" />
+    <param name="laser_assembler_duration" value="1.0" />
+  </node>
+
+</launch>
