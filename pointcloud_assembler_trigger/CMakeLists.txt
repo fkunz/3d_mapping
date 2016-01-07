@@ -28,8 +28,7 @@ add_library(trigger_interface_provider src/TriggerInterfaceProvider.cpp)
 add_library(assembler_trigger src/AssemblerTrigger.cpp)
 
 add_executable(assembler_trigger_node src/AssemblerTriggerNode.cpp)
-
-add_dependencies(assembler_trigger ${${PROJECT_NAME}_EXPORTED_TARGETS})
+add_dependencies(assembler_trigger ${PROJECT_NAME}_gencfg)
 
 target_link_libraries(assembler_trigger
   trigger_interface_provider

@@ -6,7 +6,7 @@
   <arg name="assemble_full_swipe" default="false" />
   <arg name="min_point_count" default="6000" />
 
-  <include file="$(find hector_icp_mapping)/launch/lidar_proc.launch" >
+<!--  <include file="$(find hector_icp_mapping)/launch/lidar_proc.launch" >
     <arg name="scan_topic" value="$(arg scan_topic)" />
   </include>
 
@@ -14,9 +14,6 @@
     <remap from="header_manipulation_node/input" to="/scan_cloud/filtered" />
     <remap from="header_manipulation_node/output" to="/scan_cloud/modified" />
     <param name="time_offset_milliseconds" value="0.0" />
-<!-- Setting for ohne_video: 25.0 -->
-<!-- Setting for speed_3_safe: 42.0 -->
-<!-- Setting for speed_6: 12.0 -->
   </node>
 
   <node type="point_cloud2_assembler" pkg="laser_assembler" name="assembler" ns="$(arg namespace)" output="screen" >
@@ -29,15 +26,16 @@
     <remap from="trigger/modified" to="/scan_cloud/modified" />
     <param name="assemble_full_swipe" value="$(arg assemble_full_swipe)" />
     <param name="min_point_count" value="$(arg min_point_count)" />
+  </node>-->
 
-  </node>
+  <node type="joint_state_to_odometer" pkg="monstertruck_odom_estimation" name="joint_state_to_odometer" output="screen" />
 
   <node type="odom_estimation" pkg="monstertruck_odom_estimation" name="odom" output="screen" >
     <param name="odom_reference_frame" value="odom" />
     <param name="platform_root_frame" value="base_stabilized" />
-    <param name="ang_vel_factor" value="0.9" />
+    <param name="ang_vel_factor" value="0.6" />
     <param name="lin_vel_factor" value="1.1" />
-    <param name="use_dynamic_ang_factor" value="true" />
+    <param name="use_dynamic_ang_factor" value="false" />
     <param name="dynamic_activation_threshold" value="0.3" />
     <param name="dynamic_gain_factor" value="20.0" />
     <param name="max_dynamic_ang_factor" value="0.65" />

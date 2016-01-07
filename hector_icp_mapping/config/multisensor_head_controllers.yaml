@@ -1,0 +1,28 @@
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 125
+
+  head1_lidar_controller:
+    type: effort_controllers/JointVelocityController
+    joint: head1_lidar_spinning_joint
+    pid: {p: 0.4, i: 0.0, d: 0.0}
+
+  head2_lidar_controller:
+    type: effort_controllers/JointVelocityController
+    joint: head2_lidar_spinning_joint
+    pid: {p: 0.4, i: 0.0, d: 0.0}
+
+  head3_lidar_controller:
+    type: effort_controllers/JointVelocityController
+    joint: head3_lidar_spinning_joint
+    pid: {p: 0.4, i: 0.0, d: 0.0}
+
+  head4_lidar_controller:
+    type: effort_controllers/JointVelocityController
+    joint: head4_lidar_spinning_joint
+    pid: {p: 0.4, i: 0.0, d: 0.0}
+
+  head5_lidar_controller:
+    type: effort_controllers/JointVelocityController
+    joint: head5_lidar_spinning_joint
+    pid: {p: 0.4, i: 0.0, d: 0.0}
