@@ -42,6 +42,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/JointState.h>
+#include <std_msgs/String.h>
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
 
@@ -64,6 +65,7 @@ class PcAssemblerTrigger {
   void configCB(Config &config, uint32_t level);
   void jointStatesCB(const sensor_msgs::JointStateConstPtr &joint_states_ptr);
   void scanCloudCB(const sensor_msgs::PointCloud2ConstPtr &scan_cloud_ptr);
+  void syscommandCB(const std_msgs::StringConstPtr &syscommand_ptr);
   bool callAssembler(ros::Time start_time, ros::Time end_time);
   bool callAssembler(ros::Time end_time);
   ros::Time calculateTimeBetweenStamps(const ros::Time &first, const ros::Time &second);
@@ -71,11 +73,12 @@ class PcAssemblerTrigger {
   bool approxMaxAngleTime(ros::Time *peak_time);
   bool approxMinAngleTime(ros::Time *even_time);
   void waitForInitialScan();
+  void resetInitialFlag();
 
   ros::Rate *const update_rate_;
   tf::TransformListener *const tf_listener_;
   ros::NodeHandle nh_;
-  ros::Subscriber joint_states_sub_, laser_cloud_sub_;
+  ros::Subscriber joint_states_sub_, laser_cloud_sub_, syscommand_sub_;
   ros::Publisher command_publisher_, horizontal_cw_publisher_, horizontal_ccw_publisher_, pointcloud2_publisher_, pointcloud2_cw_publisher_, pointcloud2_ccw_publisher_;
   ros::ServiceClient assemble_pc2_client_;
   boost::shared_ptr<ReconfigureServer> reconfigs_server_;

@@ -33,8 +33,10 @@ namespace pointcloud_assembler_trigger {
 PcAssemblerTrigger::PcAssemblerTrigger(ros::Rate *const rate, tf::TransformListener *const tf_listener, ros::NodeHandle private_nh)
     : update_rate_(rate), tf_listener_(tf_listener)
 {
-    joint_states_sub_ = private_nh.subscribe("/joint_states", 10, &PcAssemblerTrigger::jointStatesCB, this);
+    ros::NodeHandle nh;
+    joint_states_sub_ = nh.subscribe("joint_states", 10, &PcAssemblerTrigger::jointStatesCB, this);
     laser_cloud_sub_ = private_nh.subscribe("modified", 10, &PcAssemblerTrigger::scanCloudCB, this);
+    syscommand_sub_ = nh.subscribe("syscommand", 10, &PcAssemblerTrigger::syscommandCB, this);
 
     pointcloud2_publisher_ = nh_.advertise<sensor_msgs::PointCloud2>("assembled", 10);
     pointcloud2_cw_publisher_ = nh_.advertise<sensor_msgs::PointCloud2>("cw_assembled", 10);
@@ -91,20 +93,14 @@ PcAssemblerTrigger::PcAssemblerTrigger(ros::Rate *const rate, tf::TransformListe
 
     last_assemble_call_ = ros::Time::now();
     positive_roll_ = true;
-    if (check_sensor_pos_)
-    {
-        initialized_ = false;
-    } else
-    {
-        initialized_ = true;
-    }
+    resetInitialFlag();
 
     // Setting up inital scan sequence. Wait for a maximum peak angle,
     // followed by a minimum then determin the next two maximum peak times
     // to form a scan from side to side.
     init_sequence_.push_back(&PcAssemblerTrigger::approxMaxAngleTime);
     init_sequence_.push_back(&PcAssemblerTrigger::approxMaxAngleTime);
-//    init_sequence_.push_back(&PcAssemblerTrigger::approxMinAngleTime);
+    init_sequence_.push_back(&PcAssemblerTrigger::approxMinAngleTime);
 //    init_sequence_.push_back(&PcAssemblerTrigger::approxMaxAngleTime);
     init_scan_start_time_ = ros::Time(0,0);
 }
@@ -202,6 +198,14 @@ void PcAssemblerTrigger::jointStatesCB(const sensor_msgs::JointStateConstPtr &jo
 void PcAssemblerTrigger::scanCloudCB(const sensor_msgs::PointCloud2ConstPtr &scan_cloud_ptr)
 {
     last_scan_timestamps_.push_front(scan_cloud_ptr->header.stamp);
+}
+
+void PcAssemblerTrigger::syscommandCB(const std_msgs::StringConstPtr &syscommand_ptr)
+{
+    if (syscommand_ptr->data == "reset")
+    {
+        resetInitialFlag();
+    }
 }
 
 bool PcAssemblerTrigger::callAssembler(ros::Time start_time, ros::Time end_time)
@@ -379,6 +383,17 @@ void PcAssemblerTrigger::waitForInitialScan()
     {
         init_sequence_.pop_back();
         ROS_INFO("Check in init_squence succeeded. Leaving %i checks.", static_cast<int>(init_sequence_.size()));
+    }
+}
+
+void PcAssemblerTrigger::resetInitialFlag()
+{
+    if (check_sensor_pos_)
+    {
+        initialized_ = false;
+    } else
+    {
+        initialized_ = true;
     }
 }
 }
