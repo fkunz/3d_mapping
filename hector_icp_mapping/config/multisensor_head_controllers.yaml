@@ -21,8 +21,3 @@
     type: effort_controllers/JointVelocityController
     joint: head4_lidar_spinning_joint
     pid: {p: 0.4, i: 0.0, d: 0.0}
-
-  head5_lidar_controller:
-    type: effort_controllers/JointVelocityController
-    joint: head5_lidar_spinning_joint
-    pid: {p: 0.4, i: 0.0, d: 0.0}

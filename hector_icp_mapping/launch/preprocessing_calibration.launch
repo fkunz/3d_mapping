@@ -12,13 +12,13 @@
 <!--  <node name="laser1_link_cw_publisher" type="static_transform_publisher" pkg="tf" output="screen" ns="$(arg namespace)" args="0 0 0 0 0 0.05 laser1_link_fixed cw_laser1_link_fixed 50" />
   <node name="laser1_link_ccw_publisher" type="static_transform_publisher" pkg="tf" output="screen" ns="$(arg namespace)" args="0 0 0 0 0 -0.06 laser1_link_fixed ccw_laser1_link_fixed 50" />-->
 
-  <node name="scan_modification_node" type="scan_modification_node" pkg="header_manipulation" output="screen" ns="$(arg namespace)" >
+  <node name="scan_manipulation_node" type="scan_manipulation_node" pkg="header_manipulation" output="screen" ns="$(arg namespace)" >
     <remap from="laser_in" to="$(arg scan_topic)" />
     <remap from="laser_out" to="/scan_cloud/scan" />
     <param name="frame_id_to_replace" value="/laser1_frame" />
     <param name="frame_id_new" value="/laser1_frame_cal" />
     <param name="msg_delay_milliseconds" value="0.0" />
-    <param name="time_offset_milliseconds" value="0.0" />
+    <param name="time_offset_milliseconds" value="17.0" />
     <param name="publish_retry_rate" value="1000.0" />
 <!-- Setting for ohne_video: 25.0 -->
 <!-- Setting for speed_3_safe: 42.0 -->
@@ -45,13 +45,15 @@
 
   <node type="odom_estimation" pkg="monstertruck_odom_estimation" name="odom" output="screen" >
     <param name="odom_reference_frame" value="odom" />
+    <param name="tf_odom_frame" value="odom" />
+    <param name="publish_odom_as_parent" value="true" />
     <param name="platform_root_frame" value="base_stabilized" />
-    <param name="ang_vel_factor" value="0.9" />
+    <param name="ang_vel_factor" value="0.6" />
     <param name="lin_vel_factor" value="1.1" />
-    <param name="use_dynamic_ang_factor" value="true" />
+    <param name="use_dynamic_ang_factor" value="false" />
     <param name="dynamic_activation_threshold" value="0.3" />
     <param name="dynamic_gain_factor" value="20.0" />
-    <param name="max_dynamic_ang_factor" value="0.65" />
+    <param name="max_dynamic_ang_factor" value="0.9" />
     <param name="max_steer_angle" value="0.53" />
   </node>
 

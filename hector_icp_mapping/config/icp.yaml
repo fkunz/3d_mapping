@@ -12,6 +12,7 @@ outlierFilters:
 
 errorMinimizer:
   PointToPlaneErrorMinimizer
+#  PointToPlaneWithCovErrorMinimizer
 
 transformationCheckers:
   - DifferentialTransformationChecker:
@@ -25,8 +26,14 @@ transformationCheckers:
       maxTranslationNorm: 5.00
 
 inspector:
-# VTKFileInspector
- NullInspector
+  #PerformanceInspector:
+  #VTKFileInspector:
+    #dumpPerfOnExit: 1
+    #dumpStats: 1
+  NullInspector
 
 logger:
-  FileLogger
+  FileLogger:
+    infoFileName: info.log
+    warningFileName: warn.log
+    displayLocation: 1

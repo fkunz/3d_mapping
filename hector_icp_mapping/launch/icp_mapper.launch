@@ -16,6 +16,7 @@
     <param name="minMapPointCount" value="1000" /> 
     <param name="localizing" value="true" /> 
     <param name="mapping" value="false" />
+    <param name="tfRefreshPeriod" value="0.01" />
   </node>
   
   <node name="correct_icp_pose_node" type="correct_icp_mapper_pose_node" pkg="correct_icp_mapper_pose" output="screen" />
