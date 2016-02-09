@@ -2,10 +2,7 @@
 
 <launch>
 
-  <node pkg="odometry_manipulation" type="odometry_manipulation_node" name="odom_manipulator">
-    <param name="angular_factor" value="-0.05"/>
-    <param name="linear_factor" value="2.5"/>
-  </node>
+  <arg name="odom_topic" default="odom" />
 
   <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization" clear_params="true">
     <param name="frequency" value="50"/>
@@ -19,7 +16,7 @@
     <param name="publish_tf_as_parent" value="false"/>
     <param name="transform_time_offset" value="0.0"/>
 
-    <param name="odom0" value="manipulated_odom"/>
+    <param name="odom0" value="$(arg odom_topic)"/>
     <param name="imu0" value="imu_quat"/>
 
     <!-- x, y, z,
