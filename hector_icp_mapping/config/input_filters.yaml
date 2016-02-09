@@ -1,17 +1,17 @@
-- MaxDistDataPointsFilter:
-    dim: -1
-    maxDist: 20
+#- MaxDistDataPointsFilter:
+#    dim: -1
+#    maxDist: 20
 #- MinDistDataPointsFilter:
 #    dim: -1
 #    minDist: 0.3
 - SimpleSensorNoiseDataPointsFilter
 - SamplingSurfaceNormalDataPointsFilter:
     knn: 20
-    ratio: 0.6
+    ratio: 0.8
     keepNormals: 1
     keepDensities: 1
 - MaxDensityDataPointsFilter:
-    maxDensity: 8000
+    maxDensity: 27000
 #- ShadowDataPointsFilter:
 #    eps: 0.3
 - ObservationDirectionDataPointsFilter

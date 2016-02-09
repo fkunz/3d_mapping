@@ -10,6 +10,10 @@ self_see_links:
 - name: Rear_left_wheel_link
 - name: Rear_right_motor_link
 - name: Rear_right_wheel_link
+- name: left_rear_flipper_base_link
+- name: right_rear_flipper_base_link
+- name: left_front_flipper_base_link
+- name: right_front_flipper_base_link
 - name: base_link
 - name: cameraYawServo
 - name: infrared_frame
