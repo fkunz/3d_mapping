@@ -30,25 +30,10 @@
 
 namespace pointcloud_assembler_trigger {
 
-PcAssemblerTrigger::PcAssemblerTrigger(ros::Rate *const rate, tf::TransformListener *const tf_listener, ros::NodeHandle private_nh)
+PcAssemblerTrigger::PcAssemblerTrigger(ros::Rate *const rate, tf::TransformListener *const tf_listener, ros::NodeHandle& private_nh)
     : update_rate_(rate), tf_listener_(tf_listener)
 {
-    ros::NodeHandle nh;
-    joint_states_sub_ = nh.subscribe("joint_states", 10, &PcAssemblerTrigger::jointStatesCB, this);
-    laser_cloud_sub_ = private_nh.subscribe("modified", 10, &PcAssemblerTrigger::scanCloudCB, this);
-    syscommand_sub_ = nh.subscribe("syscommand", 10, &PcAssemblerTrigger::syscommandCB, this);
-
-    pointcloud2_publisher_ = nh_.advertise<sensor_msgs::PointCloud2>("assembled", 10);
-    pointcloud2_cw_publisher_ = nh_.advertise<sensor_msgs::PointCloud2>("cw_assembled", 10);
-    pointcloud2_ccw_publisher_ = nh_.advertise<sensor_msgs::PointCloud2>("ccw_assembled", 10);
-    assemble_pc2_client_ = nh_.serviceClient<laser_assembler::AssembleScans2>("assemble_scans2");
-
-    reconfigs_server_.reset(new ReconfigureServer(private_nh));
-    reconfigs_server_->setCallback(boost::bind(&PcAssemblerTrigger::configCB, this, _1, _2));
-
-    min_elements_to_compare_ = 4;
-    decision_threshold_ = 3;
-    min_point_count_ = 6000;
+    // Get parameter values
     int tmp_int;
     private_nh.param("min_elements_to_compare", tmp_int, 4);
     if (tmp_int > 0)
@@ -83,17 +68,34 @@ PcAssemblerTrigger::PcAssemblerTrigger(ros::Rate *const rate, tf::TransformListe
         ROS_ERROR("Was given negative or null value for joint_states_buffer_size.");
     }
 
-
     private_nh.param("base_frame", base_frame_, std::string("base_link"));
     private_nh.param("sensor_frame", moving_frame_, std::string("laser1_frame"));
+
     private_nh.param("assemble_full_swipe", assemble_full_swipe_, false);
     private_nh.param("check_sensor_pos", check_sensor_pos_, true);
 
+    private_nh.param("init_topic", init_topic_, std::string("/point_map"));
+    private_nh.param("init_assembler_duration", init_assembler_duration_, 3.0);
+
+    init_sub_ = nh_.subscribe(init_topic_, 1, &PcAssemblerTrigger::initTopicCB, this);
+    joint_states_sub_ = nh_.subscribe("joint_states", 10, &PcAssemblerTrigger::jointStatesCB, this);
+    laser_cloud_sub_ = private_nh.subscribe("modified", 10, &PcAssemblerTrigger::scanCloudCB, this);
+    syscommand_sub_ = nh_.subscribe("syscommand", 10, &PcAssemblerTrigger::syscommandCB, this);
+
+    pointcloud2_publisher_ = nh_.advertise<sensor_msgs::PointCloud2>("assembled", 10);
+    pointcloud2_cw_publisher_ = nh_.advertise<sensor_msgs::PointCloud2>("cw_assembled", 10);
+    pointcloud2_ccw_publisher_ = nh_.advertise<sensor_msgs::PointCloud2>("ccw_assembled", 10);
+    assemble_pc2_client_ = nh_.serviceClient<laser_assembler::AssembleScans2>("assemble_scans2");
+
+    reconfigs_server_.reset(new ReconfigureServer(private_nh));
+    reconfigs_server_->setCallback(boost::bind(&PcAssemblerTrigger::configCB, this, _1, _2));
+
+    // Initialize buffers and flags
     last_laser_joint_states_ = boost::circular_buffer<sensor_msgs::JointState>(joint_states_buffer_size_);
 
     last_assemble_call_ = ros::Time::now();
     positive_roll_ = true;
-    resetInitialFlag();
+    resetInitialState();
 
     // Setting up inital scan sequence. Wait for a maximum peak angle,
     // followed by a minimum then determin the next two maximum peak times
@@ -107,8 +109,6 @@ PcAssemblerTrigger::PcAssemblerTrigger(ros::Rate *const rate, tf::TransformListe
 
 PcAssemblerTrigger::~PcAssemblerTrigger()
 {
-    delete update_rate_;
-    delete tf_listener_;
 }
 
 void PcAssemblerTrigger::update()
@@ -151,9 +151,13 @@ void PcAssemblerTrigger::update()
     }
 
     ros::Time current_time = ros::Time::now();
-    if (initialized_ && ((current_time - last_assemble_call_) > ros::Duration(laser_assembler_duration)))
+    ros::Duration assembler_duration(laser_assembler_duration_);
+    if (!initialized_)
+        assembler_duration.fromSec(init_assembler_duration_);
+
+    if ((current_time - last_assemble_call_) > ros::Duration(assembler_duration))
     {
-        ROS_DEBUG("Calling assembler at current_time: %f as last_assemble_call was %f. laser_assembler_duration is: %f", current_time.toSec(), last_assemble_call_.toSec(), laser_assembler_duration);
+        ROS_DEBUG("Calling assembler at current_time: %f as last_assemble_call was %f. laser_assembler_duration is: %f", current_time.toSec(), last_assemble_call_.toSec(), laser_assembler_duration_);
         callAssembler(current_time);
         return;
     }
@@ -162,8 +166,15 @@ void PcAssemblerTrigger::update()
 void PcAssemblerTrigger::configCB(Config &config, uint32_t level)
 {
     ROS_INFO("Assembler Trigger in config callback.");
-    laser_assembler_duration = config.laser_assembler_duration;
+    laser_assembler_duration_ = config.laser_assembler_duration;
     *update_rate_ = ros::Rate(config.update_rate);
+}
+
+void PcAssemblerTrigger::initTopicCB(const topic_tools::ShapeShifter::ConstPtr &init_msg_ptr)
+{
+    ROS_INFO("Received first message on init topic, leaving init state.");
+    initialized_ = true;
+    init_sub_.shutdown();
 }
 
 void PcAssemblerTrigger::jointStatesCB(const sensor_msgs::JointStateConstPtr &joint_states_ptr)
@@ -204,7 +215,7 @@ void PcAssemblerTrigger::syscommandCB(const std_msgs::StringConstPtr &syscommand
 {
     if (syscommand_ptr->data == "reset")
     {
-        resetInitialFlag();
+        resetInitialState();
     }
 }
 
@@ -386,15 +397,10 @@ void PcAssemblerTrigger::waitForInitialScan()
     }
 }
 
-void PcAssemblerTrigger::resetInitialFlag()
+void PcAssemblerTrigger::resetInitialState()
 {
-    if (check_sensor_pos_)
-    {
-        initialized_ = false;
-    } else
-    {
-        initialized_ = true;
-    }
+    initialized_ = false;
+    init_sub_ = nh_.subscribe(init_topic_, 1, &PcAssemblerTrigger::initTopicCB, this);
 }
 }
 
@@ -416,7 +422,7 @@ int main(int argc, char **argv)
     }
 
     delete rate;
-//    delete tf_listener;
+    delete tf_listener;
 
     return 0;
 }

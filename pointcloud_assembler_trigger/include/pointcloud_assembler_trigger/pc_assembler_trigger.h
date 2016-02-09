@@ -43,6 +43,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/String.h>
+#include <topic_tools/shape_shifter.h>
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
 
@@ -51,8 +52,8 @@ namespace pointcloud_assembler_trigger {
 class PcAssemblerTrigger {
  public:
   PcAssemblerTrigger(ros::Rate *const rate,
-                             tf::TransformListener *const tf_listener,
-                             ros::NodeHandle private_nh);
+                     tf::TransformListener *const tf_listener,
+                     ros::NodeHandle& private_nh);
   ~PcAssemblerTrigger();
 
   void update();
@@ -63,6 +64,7 @@ class PcAssemblerTrigger {
   typedef bool (PcAssemblerTrigger::*approxTime)(ros::Time *);
 
   void configCB(Config &config, uint32_t level);
+  void initTopicCB(const topic_tools::ShapeShifter::ConstPtr &init_msg_ptr);
   void jointStatesCB(const sensor_msgs::JointStateConstPtr &joint_states_ptr);
   void scanCloudCB(const sensor_msgs::PointCloud2ConstPtr &scan_cloud_ptr);
   void syscommandCB(const std_msgs::StringConstPtr &syscommand_ptr);
@@ -73,18 +75,19 @@ class PcAssemblerTrigger {
   bool approxMaxAngleTime(ros::Time *peak_time);
   bool approxMinAngleTime(ros::Time *even_time);
   void waitForInitialScan();
-  void resetInitialFlag();
+  void resetInitialState();
 
   ros::Rate *const update_rate_;
   tf::TransformListener *const tf_listener_;
   ros::NodeHandle nh_;
-  ros::Subscriber joint_states_sub_, laser_cloud_sub_, syscommand_sub_;
+  ros::Subscriber init_sub_, joint_states_sub_, laser_cloud_sub_, syscommand_sub_;
   ros::Publisher command_publisher_, horizontal_cw_publisher_, horizontal_ccw_publisher_, pointcloud2_publisher_, pointcloud2_cw_publisher_, pointcloud2_ccw_publisher_;
   ros::ServiceClient assemble_pc2_client_;
   boost::shared_ptr<ReconfigureServer> reconfigs_server_;
-  double laser_assembler_duration;
+  double laser_assembler_duration_, init_assembler_duration_;
   uint min_elements_to_compare_, decision_threshold_, min_point_count_, joint_states_buffer_size_;
   std::string base_frame_, moving_frame_;
+  std::string init_topic_;
   ros::Time last_assemble_call_;
   boost::circular_buffer<sensor_msgs::JointState> last_laser_joint_states_;
   std::deque<ros::Time> last_scan_timestamps_;

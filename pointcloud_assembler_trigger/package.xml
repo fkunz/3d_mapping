@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>pointcloud_assembler_trigger</name>
-  <version>0.0.0</version>
+  <version>0.0.1</version>
   <description>The pointcloud_assembler_trigger package</description>
   <maintainer email="fkunz@sim.tu-darmstadt.de">Florian Kunz</maintainer>
   <license>BSD</license>
@@ -14,11 +14,13 @@
   <build_depend>geometry_msgs</build_depend>
   <build_depend>laser_assembler</build_depend>
   <build_depend>sensor_msgs</build_depend>
+  <build_depend>topic_tools</build_depend>
   
   <run_depend>roscpp</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>laser_assembler</run_depend>
   <run_depend>sensor_msgs</run_depend>
+  <run_depend>topic_tools</run_depend>
 
 </package>
