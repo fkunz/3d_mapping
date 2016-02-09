@@ -27,11 +27,12 @@
 
   <node type="assembler_trigger_old" pkg="pointcloud_assembler_trigger" name="trigger" ns="$(arg namespace)" output="screen" >
     <remap from="trigger/modified" to="/scan_cloud/filtered" />
+    <remap from="syscommand" to="/syscommand" />
     <param name="assemble_full_swipe" value="$(arg assemble_full_swipe)" />
     <param name="min_point_count" value="$(arg min_point_count)" />
     <param name="check_sensor_pos" value="false" />
-    <param name="init_assembler_duration" value="3.0" />
-    <param name="laser_assembler_duration" value="0.333" />
+    <param name="init_assembler_duration" value="2.0" />
+    <param name="laser_assembler_duration" value="0.666" />
   </node>
 
   <node pkg="hector_imu_tools" type="pose_and_orientation_to_imu_node" name="pose_and_orientation_to_imu_node" output="screen">

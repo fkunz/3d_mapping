@@ -93,18 +93,7 @@ PcAssemblerTrigger::PcAssemblerTrigger(ros::Rate *const rate, tf::TransformListe
     // Initialize buffers and flags
     last_laser_joint_states_ = boost::circular_buffer<sensor_msgs::JointState>(joint_states_buffer_size_);
 
-    last_assemble_call_ = ros::Time::now();
-    positive_roll_ = true;
     resetInitialState();
-
-    // Setting up inital scan sequence. Wait for a maximum peak angle,
-    // followed by a minimum then determin the next two maximum peak times
-    // to form a scan from side to side.
-    init_sequence_.push_back(&PcAssemblerTrigger::approxMaxAngleTime);
-    init_sequence_.push_back(&PcAssemblerTrigger::approxMaxAngleTime);
-    init_sequence_.push_back(&PcAssemblerTrigger::approxMinAngleTime);
-//    init_sequence_.push_back(&PcAssemblerTrigger::approxMaxAngleTime);
-    init_scan_start_time_ = ros::Time(0,0);
 }
 
 PcAssemblerTrigger::~PcAssemblerTrigger()
@@ -113,10 +102,17 @@ PcAssemblerTrigger::~PcAssemblerTrigger()
 
 void PcAssemblerTrigger::update()
 {
+    ros::Time start_time = ros::Time::now();
     if (last_assemble_call_.isZero())
     {
-        last_assemble_call_ = ros::Time::now();
+        last_assemble_call_ = start_time;
         return;
+    }
+
+    if (last_assemble_call_ > start_time)
+    {
+        ROS_WARN("Jump back in time detected. Reset to inital state!");
+        resetInitialState();
     }
 
     getTransforms();
@@ -130,7 +126,7 @@ void PcAssemblerTrigger::update()
             return;
         }
 
-        ros::Time peak_time = ros::Time::now();
+        ros::Time peak_time = start_time;
         if (approxMaxAngleTime(&peak_time))
         {
             if (!callAssembler(peak_time))
@@ -142,7 +138,7 @@ void PcAssemblerTrigger::update()
             return;
         }
 
-        ros::Time even_time = ros::Time::now();
+        ros::Time even_time = start_time;
         if (!assemble_full_swipe_ && approxMinAngleTime(&even_time))
         {
             callAssembler(even_time);
@@ -150,7 +146,7 @@ void PcAssemblerTrigger::update()
         }
     }
 
-    ros::Time current_time = ros::Time::now();
+    ros::Time current_time = start_time;
     ros::Duration assembler_duration(laser_assembler_duration_);
     if (!initialized_)
         assembler_duration.fromSec(init_assembler_duration_);
@@ -401,6 +397,18 @@ void PcAssemblerTrigger::resetInitialState()
 {
     initialized_ = false;
     init_sub_ = nh_.subscribe(init_topic_, 1, &PcAssemblerTrigger::initTopicCB, this);
+
+    // Setting up inital scan sequence. Wait for a maximum peak angle,
+    // followed by a minimum then determin the next two maximum peak times
+    // to form a scan from side to side.
+    init_sequence_.push_back(&PcAssemblerTrigger::approxMaxAngleTime);
+    init_sequence_.push_back(&PcAssemblerTrigger::approxMaxAngleTime);
+    init_sequence_.push_back(&PcAssemblerTrigger::approxMinAngleTime);
+//    init_sequence_.push_back(&PcAssemblerTrigger::approxMaxAngleTime);
+    init_scan_start_time_ = ros::Time(0,0);
+
+    last_assemble_call_ = ros::Time::now();
+    positive_roll_ = true;
 }
 }
 

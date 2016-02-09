@@ -3,8 +3,8 @@
 <launch>
 
   <node pkg="odometry_manipulation" type="odometry_manipulation_node" name="odom_manipulator">
-    <param name="angular_factor" value="0.1"/>
-    <param name="linear_factor" value="1.4"/>
+    <param name="angular_factor" value="-0.05"/>
+    <param name="linear_factor" value="2.5"/>
   </node>
 
   <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization" clear_params="true">

@@ -12,7 +12,7 @@
     keepDensities: 1
 - MaxDensityDataPointsFilter:
     maxDensity: 27000
-#- ShadowDataPointsFilter:
-#    eps: 0.3
+- ShadowDataPointsFilter:
+    eps: 0.1
 - ObservationDirectionDataPointsFilter
 - OrientNormalsDataPointsFilter 

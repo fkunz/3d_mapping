@@ -11,8 +11,8 @@ outlierFilters:
      maxAngle: 0.42
 
 errorMinimizer:
-#  PointToPlaneErrorMinimizer
-  PointToPlaneWithCovErrorMinimizer
+  PointToPlaneErrorMinimizer
+#  PointToPlaneWithCovErrorMinimizer
 
 transformationCheckers:
   - DifferentialTransformationChecker:
