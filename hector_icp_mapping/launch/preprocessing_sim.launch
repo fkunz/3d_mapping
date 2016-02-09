@@ -28,7 +28,7 @@
     <param name="assemble_full_swipe" value="$(arg assemble_full_swipe)" />
     <param name="min_point_count" value="$(arg min_point_count)" />
     <param name="check_sensor_pos" value="false" />
-    <param name="laser_assembler_duration" value="0.33" />
+    <param name="laser_assembler_duration" value="0.5" />
   </node>
 
   <node type="joint_state_to_odometer" pkg="monstertruck_odom_estimation" name="joint_state_to_odometer" output="screen" />
@@ -38,7 +38,7 @@
     <param name="platform_root_frame" value="base_link" />
     <param name="stabilized_root_frame_" value="false" />
     <param name="publish_tf_as_parent" value="$(arg publish_tf_as_parent)" />
-    <param name="ang_vel_factor" value="0.6" />
+    <param name="ang_vel_factor" value="0.4" />
     <param name="lin_vel_factor" value="1.1" />
     <param name="use_dynamic_ang_factor" value="false" />
     <param name="dynamic_activation_threshold" value="0.3" />
