@@ -42,12 +42,12 @@
     <remap from="/pose" to="/slam_out_pose" />
   </node>
 
-  <node pkg="odometry_manipulation" type="odometry_manipulation_node" name="odom_manipulator">
-    <param name="angular_factor" value="-0.05"/>
+  <node pkg="odometry_manipulation" type="odometry_manipulation_node" name="odom_manipulator" output="screen">
+    <param name="angular_factor" value="-0.02"/>
     <param name="linear_factor" value="2.5"/>
   </node>
 
-  <include file="$(find hector_icp_mapping)/launch/ekf_localization.launch" >
+  <include file="$(find hector_icp_mapping)/launch/ekf_localization.launch">
     <param name="odom_topic" value="manipulated_odom" />
   </include>
 
