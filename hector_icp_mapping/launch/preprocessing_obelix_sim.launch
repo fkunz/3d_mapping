@@ -38,6 +38,7 @@
 
   <include file="$(find hector_icp_mapping)/launch/ekf_localization.launch" >
     <param name="odom_topic" value="manipulated_odom" />
+    <param name="publish_tf_as_parent" value="$arg(publish_tf_as_parent)"/>
   </include>
 
 </launch>

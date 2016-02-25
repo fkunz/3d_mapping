@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+
+<launch>
+<!--  <include file="$(find hector_icp_mapping)/launch/preprocessing.launch" >
+  </include>-->
+  <arg name="real_robot" default="true" />
+  <arg name="publish_tf_as_parent" default="true" />
+  <arg name="map_frame" default="map" />
+
+<!--   <group if="$(optenv REALROBOT 0)"> -->
+  <group if="$(arg real_robot)">
+    <include file="$(find hector_icp_mapping)/launch/preprocessing_obelix.launch" >
+      <arg name="namespace" value="/scan_cloud" />
+      <arg name="scan_topic" value="/head_lidar/scan" />
+      <arg name="assemble_full_swipe" value="false" />
+      <arg name="min_point_count" value="20" />
+      <arg name="publish_tf_as_parent" value="$(arg publish_tf_as_parent)" />
+    </include>
+
+    <include file="$(find hector_icp_mapping)/launch/icp_mapper_obelix.launch" >
+      <arg name="publish_tf_as_parent" value="$(arg publish_tf_as_parent)" />
+      <arg name="map_frame" value="$(arg map_frame)" />
+    </include>
+  </group>
+
+<!--   <group unless="$(optenv REALROBOT 0)"> -->
+  <group unless="$(arg real_robot)">
+    <include file="$(find hector_icp_mapping)/launch/hydra_head_controllers.launch" >
+    </include>
+
+    <include file="$(find hector_icp_mapping)/launch/preprocessing_obelix_sim.launch" >
+      <arg name="namespace" value="/scan_cloud" />
+      <arg name="scan_topic" value="/head1_lidar/scan" />
+      <arg name="assemble_full_swipe" value="false" />
+      <arg name="min_point_count" value="20" />
+      <arg name="publish_tf_as_parent" value="$(arg publish_tf_as_parent)" />
+    </include>
+
+    <include file="$(find hector_icp_mapping)/launch/icp_mapper_obelix_sim.launch" >
+      <arg name="publish_tf_as_parent" value="$(arg publish_tf_as_parent)" />
+      <arg name="map_frame" value="$(arg map_frame)" />
+    </include>
+  </group>
+</launch>
